@@ -100,7 +100,7 @@ export default function NewsPage() {
                   // prevent triggering when clicking the delete button
                   if (e.target.closest("button")) return;
                   try {
-                    await api.incrementNewsView(item.id);
+                    await api?.incrementNewsView(item?.id);
                   } catch (err) {
                     console.error("View increment error", err);
                   }
@@ -109,7 +109,7 @@ export default function NewsPage() {
               >
                 <div className="flex-1 min-w-0">
                   <h3 className="text-white font-medium group-hover:text-rose-300 transition-colors truncate text-sm sm:text-base">
-                    {item.title}
+                    {item?.title}
                   </h3>
                   {item.content && (
                     <p className="text-gray-400 text-xs mt-1 truncate hidden sm:block">

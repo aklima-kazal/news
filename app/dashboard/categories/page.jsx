@@ -13,11 +13,19 @@ export default function CategoriesPage() {
   const [deletingId, setDeletingId] = useState(null);
   const { searchQuery } = useSearch();
 
+  // Fetch categories on mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const data = await api.getCategories();
-        setCategories(data);
+
+        // Ensure each category has a string name
+        const normalized = data.map((cat) => ({
+          ...cat,
+          name: typeof cat.name === "string" ? cat.name : cat.name?.name || "",
+        }));
+
+        setCategories(normalized);
       } catch (err) {
         const message =
           err.message || "Failed to load categories. Please refresh the page.";
@@ -38,21 +46,17 @@ export default function CategoriesPage() {
     return categories.filter((cat) => cat.name.toLowerCase().includes(query));
   }, [categories, searchQuery]);
 
+  // Delete category
   const handleDelete = async (id, name) => {
-    // Show confirmation dialog
     const confirmed = window.confirm(
       `Are you sure you want to delete "${name}"? This action cannot be undone.`,
     );
-
     if (!confirmed) return;
 
     setDeletingId(id);
     try {
       await api.deleteCategory(id);
-
-      // Update local state
       setCategories(categories.filter((cat) => cat.id !== id));
-
       toast.success("✨ Category deleted successfully!", { duration: 2000 });
     } catch (error) {
       toast.error(`Failed to delete category: ${error.message}`, {

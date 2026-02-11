@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import toast, { Toaster } from "react-hot-toast";
@@ -10,11 +10,25 @@ export default function AddNewsPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // Load categories for selection
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const cats = await api.getCategories();
+        setCategories(cats);
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handlePublish = async () => {
     if (!title.trim() || !content.trim()) {
-      toast.error("📝 Please fill in both title and content fields.", {
+      toast.error("📝 Please fill in both title and content.", {
         duration: 3000,
       });
       return;
@@ -24,47 +38,79 @@ export default function AddNewsPage() {
     try {
       await api.createNews(title, content, category || null, "published");
       toast.success("✨ News published successfully!", { duration: 2000 });
-      router.push("/dashboard/news");
-    } catch (error) {
-      const message =
-        error.message || "Failed to publish news. Please try again.";
-      toast.error(message, { duration: 3000 });
-      console.error("Publish error:", error);
+      router.push("/dashboard");
+    } catch (err) {
+      toast.error(err.message || "Failed to publish news.", { duration: 3000 });
+      console.error("Publish error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (!title.trim()) {
+      toast.error("⚠️ Title is required to save draft.", { duration: 3000 });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await api.createNews(title, content, category || null, "draft");
+      toast.success("💾 Draft saved successfully!", { duration: 2000 });
+      router.push("/dashboard/drafts");
+    } catch (err) {
+      toast.error(err.message || "Failed to save draft.", { duration: 3000 });
+      console.error("Draft error:", err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div>
+    <div className="max-w-xl space-y-4">
       <Toaster />
-      <h1 className="text-xl text-pink-300 font-semibold mb-4">Add News</h1>
+      <h1 className="text-2xl text-pink-300 font-semibold mb-4">Add News</h1>
 
-      <div className="card space-y-4 max-w-xl">
-        <input
-          className="input w-full text-lg font-normal border border-slate-600 outline-none bg-slate-700 text-white p-2 rounded-lg"
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <textarea
-          className="input w-full h-32 border border-slate-600 resize-none outline-none bg-slate-700 text-white p-2 rounded-lg"
-          placeholder="Content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
-        <input
-          className="input w-full"
-          placeholder="Category (optional)"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        />
+      <input
+        type="text"
+        placeholder="Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        className="w-full p-2 rounded bg-slate-700 text-white border border-slate-600 outline-none"
+      />
+      <textarea
+        placeholder="Content"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        className="w-full p-2 rounded bg-slate-700 text-white border border-slate-600 outline-none h-32 resize-none"
+      />
+      <select
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+        className="w-full p-2 rounded bg-slate-700 text-white border border-slate-600 outline-none"
+      >
+        <option value="">Select category (optional)</option>
+        {categories.map((cat) => (
+          <option key={cat.id} value={cat.name}>
+            {cat.name}
+          </option>
+        ))}
+      </select>
+
+      <div className="flex gap-4">
         <button
           onClick={handlePublish}
           disabled={loading}
-          className="btn-primary text-lg font-medium text-[#ff0080] px-4 py-2 bg-purple-300 transition-all ease-in duration-300 cursor-pointer hover:rounded-md disabled:opacity-50"
+          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white rounded py-2 disabled:opacity-50"
         >
           {loading ? "Publishing..." : "Publish"}
+        </button>
+        <button
+          onClick={handleSaveDraft}
+          disabled={loading}
+          className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white rounded py-2 disabled:opacity-50"
+        >
+          {loading ? "Saving..." : "Save Draft"}
         </button>
       </div>
     </div>

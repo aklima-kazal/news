@@ -20,11 +20,16 @@ export default function AddCategoryPage() {
 
     setLoading(true);
     try {
-      await api.createCategory(name);
+      // ✅ Use the correct API method
+      await api.addCategory({ name: name.trim() });
+
       toast.success("✨ Category created successfully!", { duration: 2000 });
+
+      // Navigate back to categories list
       router.push("/dashboard/categories");
     } catch (error) {
-      const message = error.message || "Failed to create category. Please try again.";
+      const message =
+        error.message || "Failed to create category. Please try again.";
       toast.error(message, { duration: 3000 });
       console.error("Category creation error:", error);
     } finally {
@@ -33,14 +38,17 @@ export default function AddCategoryPage() {
   };
 
   return (
-    <div className="max-w-xl">
+    <div className="max-w-xl mx-auto p-6">
       <Toaster />
-      <h1 className="text-xl font-semibold text-white mb-6">Add Category</h1>
+      <h1 className="text-2xl font-semibold text-white mb-6">Add Category</h1>
 
-      <form onSubmit={handleSubmit} className="card space-y-4">
+      <form
+        onSubmit={handleSubmit}
+        className="card space-y-4 p-6 bg-slate-800 rounded-lg shadow-md"
+      >
         {/* Category Name */}
         <div>
-          <label className="block text-base font-medium text-gray-400 mb-3">
+          <label className="block text-base font-medium text-gray-400 mb-2">
             Category Name
           </label>
           <input
@@ -48,14 +56,13 @@ export default function AddCategoryPage() {
             placeholder="e.g. Politics"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            required
             disabled={loading}
             className="outline-none input w-full text-white bg-slate-700 border border-slate-600 rounded-lg p-2 disabled:opacity-50"
           />
         </div>
 
         {/* Actions */}
-        <div className="flex gap-8 pt-2">
+        <div className="flex gap-4 pt-2">
           <button
             type="submit"
             disabled={loading}
@@ -67,8 +74,8 @@ export default function AddCategoryPage() {
           <button
             type="button"
             disabled={loading}
-            className="px-4 py-2 rounded-lg border border-borderdark hover:bg-slate-600 text-md font-medium cursor-pointer text-emerald-200 hover:rotate-1 transition-all ease-in duration-200 disabled:opacity-50"
             onClick={() => setName("")}
+            className="px-4 py-2 rounded-lg border border-slate-600 hover:bg-slate-600 text-md font-medium cursor-pointer text-emerald-200 hover:rotate-1 transition-all ease-in duration-200 disabled:opacity-50"
           >
             Reset
           </button>

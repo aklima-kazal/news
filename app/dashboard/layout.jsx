@@ -1,21 +1,19 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { isLoggedIn } from "@/lib/auth";
+
+import Sidebar from "@/components/Sidebar";
+import Navbar from "@/components/Navbar";
+import { SearchProvider } from "@/lib/SearchContext";
 
 export default function DashboardLayout({ children }) {
-  const router = useRouter();
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    if (!isLoggedIn()) {
-      router.replace("/login");
-    } else {
-      setIsReady(true);
-    }
-  }, [router]);
-
-  if (!isReady) return null; // Or a loading spinner
-
-  return <div className="flex bg-slate-900 min-h-screen">{children}</div>;
+  return (
+    <SearchProvider>
+      <div className="flex min-h-screen bg-slate-900">
+        <Sidebar />
+        <div className="flex-1 flex flex-col">
+          <Navbar />
+          <main className="p-6 flex-1 overflow-auto">{children}</main>
+        </div>
+      </div>
+    </SearchProvider>
+  );
 }
