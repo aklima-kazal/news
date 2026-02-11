@@ -10,7 +10,7 @@ import { IoNewspaperOutline } from "react-icons/io5";
 import { MdOutlineCategory } from "react-icons/md";
 import { FiSettings } from "react-icons/fi";
 import { BsCaretDown, BsCaretUp } from "react-icons/bs";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut } from "lucide-react";
 
 const menu = [
   {
@@ -173,6 +173,18 @@ export default function Sidebar({
             </div>
           ))}
         </nav>
+        <div className="mt-auto pt-4">
+          <button
+            onClick={() => {
+              localStorage.removeItem("token");
+              window.location.href = "/login";
+            }}
+            className="cursor-pointer w-full flex items-center justify-center gap-2 px-3 py-2 rounded text-sm font-medium text-red-400 hover:bg-red-900/20 transition-colors"
+          >
+            <LogOut size={25} />
+            <span className="text-lg">Logout</span>
+          </button>
+        </div>
       </div>
     </>
   );

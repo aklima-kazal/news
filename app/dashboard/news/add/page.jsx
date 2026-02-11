@@ -1,118 +1,88 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import toast, { Toaster } from "react-hot-toast";
 
-export default function AddNewsPage() {
+export default function AddCategoryPage() {
   const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [category, setCategory] = useState("");
-  const [categories, setCategories] = useState([]);
+  const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Load categories for selection
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const cats = await api.getCategories();
-        setCategories(cats);
-      } catch (err) {
-        console.error("Failed to fetch categories:", err);
-      }
-    };
-    fetchCategories();
-  }, []);
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const handlePublish = async () => {
-    if (!title.trim() || !content.trim()) {
-      toast.error("📝 Please fill in both title and content.", {
-        duration: 3000,
-      });
+    // Validate input
+    if (!name.trim()) {
+      toast.error("📝 Please enter a category name.", { duration: 3000 });
       return;
     }
 
     setLoading(true);
     try {
-      await api.createNews(title, content, category || null, "published");
-      toast.success("✨ News published successfully!", { duration: 2000 });
-      router.push("/dashboard");
-    } catch (err) {
-      toast.error(err.message || "Failed to publish news.", { duration: 3000 });
-      console.error("Publish error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+      // Call API to add category
+      await api.addCategory({ name: name.trim() });
 
-  const handleSaveDraft = async () => {
-    if (!title.trim()) {
-      toast.error("⚠️ Title is required to save draft.", { duration: 3000 });
-      return;
-    }
+      toast.success("✨ Category created successfully!", { duration: 2000 });
 
-    setLoading(true);
-    try {
-      await api.createNews(title, content, category || null, "draft");
-      toast.success("💾 Draft saved successfully!", { duration: 2000 });
-      router.push("/dashboard/drafts");
-    } catch (err) {
-      toast.error(err.message || "Failed to save draft.", { duration: 3000 });
-      console.error("Draft error:", err);
+      // Navigate back to categories list
+      router.push("/dashboard/categories");
+    } catch (error) {
+      const message =
+        error?.message || "Failed to create category. Please try again.";
+      toast.error(message, { duration: 3000 });
+      console.error("Category creation error:", error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-xl space-y-4">
-      <Toaster />
-      <h1 className="text-2xl text-pink-300 font-semibold mb-4">Add News</h1>
+    <div className="max-w-xl mx-auto p-6">
+      <Toaster position="top-right" />
+      <h1 className="text-2xl font-semibold text-white mb-6">Add Category</h1>
 
-      <input
-        type="text"
-        placeholder="Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        className="w-full p-2 rounded bg-slate-700 text-white border border-slate-600 outline-none"
-      />
-      <textarea
-        placeholder="Content"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        className="w-full p-2 rounded bg-slate-700 text-white border border-slate-600 outline-none h-32 resize-none"
-      />
-      <select
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-        className="w-full p-2 rounded bg-slate-700 text-white border border-slate-600 outline-none"
+      <form
+        onSubmit={handleSubmit}
+        className="card space-y-4 p-6 bg-slate-800 rounded-lg shadow-md"
       >
-        <option value="">Select category (optional)</option>
-        {categories.map((cat) => (
-          <option key={cat.id} value={cat.name}>
-            {cat.name}
-          </option>
-        ))}
-      </select>
+        {/* Category Name */}
+        <div>
+          <label className="block text-base font-medium text-gray-400 mb-2">
+            Category Name
+          </label>
+          <input
+            type="text"
+            placeholder="e.g. Politics"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            disabled={loading}
+            className="w-full px-3 py-2 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-gray-400 focus:outline-none focus:border-pink-500 transition-colors disabled:opacity-50"
+          />
+        </div>
 
-      <div className="flex gap-4">
-        <button
-          onClick={handlePublish}
-          disabled={loading}
-          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white rounded py-2 disabled:opacity-50"
-        >
-          {loading ? "Publishing..." : "Publish"}
-        </button>
-        <button
-          onClick={handleSaveDraft}
-          disabled={loading}
-          className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white rounded py-2 disabled:opacity-50"
-        >
-          {loading ? "Saving..." : "Save Draft"}
-        </button>
-      </div>
+        {/* Form Actions */}
+        <div className="flex gap-4 pt-2">
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 bg-pink-600 text-white font-medium px-4 py-2 rounded-lg hover:bg-pink-700 transition-colors disabled:opacity-50"
+          >
+            {loading ? "Creating..." : "Save Category"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setName("")}
+            disabled={loading}
+            className="flex-1 border border-slate-600 text-white px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors disabled:opacity-50"
+          >
+            Reset
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
