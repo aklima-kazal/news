@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+.card {
+  background-color: rgb(30 41 59);
+  border: 1px solid rgb(51 65 85);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+}
+
+/* Smooth menu animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+.animate-slide-down {
+  animation: slideDown 0.2s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.15s ease-in;
+}
+
+/* Smooth width transitions */
+.sidebar-transition {
+  transition:
+    width 0.3s ease,
+    padding 0.3s ease;
+}
+
+body {
+  background: #0b0f15;
+  color: #e2e8f0;
+}
+@keyframes slide {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide {
+  animation: slide 0.2s ease-in-out;
+}
