@@ -1,90 +1,109 @@
 "use client";
 
-import { useState } from "react";
-import { toast } from "react-hot-toast";
-import { api } from "@/lib/api"; // use the api.js we fixed
+import { useRouter } from "next/navigation";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import toast, { Toaster } from "react-hot-toast";
+import { api } from "@/lib/api";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  const onSubmit = async (e) => {
-    e.preventDefault(); // prevent page reload
-    if (!email || !password) {
-      toast.error("Please enter both email and password.");
-      return;
-    }
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
 
-    setLoading(true);
-    try {
-      const result = await api.login(email, password);
+    validationSchema: Yup.object({
+      email: Yup.string().email("Invalid email").required("Email is required"),
+      password: Yup.string()
+        .min(6, "Minimum 6 characters")
+        .required("Password is required"),
+    }),
 
-      // Assuming backend returns a token and user info
-      if (result?.token) {
-        // Save auth to localStorage
-        localStorage.setItem("token", result.token);
-        localStorage.setItem("auth", JSON.stringify(result.user));
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        const result = await api.login(values.email, values.password);
 
-        toast.success("Login Successful!");
+        if (result?.token) {
+          localStorage.setItem("token", result.token);
+          localStorage.setItem("auth", JSON.stringify(result.user));
 
-        // Redirect to dashboard
-        window.location.href = "/dashboard";
-      } else {
-        toast.error(result?.message || "Login failed.");
+          toast.success("Login successful!");
+          router.push("/dashboard");
+        } else {
+          toast.error(result?.message || "Login failed");
+        }
+      } catch (err) {
+        toast.error(err.message || "Login failed");
+      } finally {
+        setSubmitting(false);
       }
-    } catch (err) {
-      toast.error(err.message || "Login failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+  });
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-900 text-white">
-      <div className="w-full max-w-md p-6 bg-slate-800 rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
+    <>
+      <Toaster position="top-right" />
 
-        <form onSubmit={onSubmit} className="space-y-4">
+      <div className="flex items-center justify-center min-h-screen bg-slate-900 text-white">
+        <form
+          onSubmit={formik.handleSubmit}
+          className="w-full max-w-md p-6 bg-slate-800 rounded-lg shadow-lg space-y-4"
+        >
+          <h1 className="text-2xl font-bold text-center">Login</h1>
+
+          {/* Email */}
           <div>
-            <label className="block mb-1">Email</label>
             <input
+              name="email"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
-              className="w-full px-3 py-2 rounded bg-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className="w-full px-3 py-2 rounded bg-slate-700"
             />
+            {formik.touched.email && formik.errors.email && (
+              <p className="text-red-400 text-sm mt-1">{formik.errors.email}</p>
+            )}
           </div>
 
+          {/* Password */}
           <div>
-            <label className="block mb-1">Password</label>
             <input
+              name="password"
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
-              className="w-full px-3 py-2 rounded bg-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className="w-full px-3 py-2 rounded bg-slate-700"
             />
+            {formik.touched.password && formik.errors.password && (
+              <p className="text-red-400 text-sm mt-1">
+                {formik.errors.password}
+              </p>
+            )}
           </div>
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={formik.isSubmitting}
             className="w-full py-2 bg-blue-600 rounded hover:bg-blue-700 disabled:opacity-50"
           >
-            {loading ? "Logging in..." : "Login"}
+            {formik.isSubmitting ? "Logging in..." : "Login"}
           </button>
-          <span className="block text-center mt-2">
+
+          <p className="text-center text-sm">
             Don't have an account?{" "}
             <a href="/register" className="text-blue-400 hover:underline">
               Register
             </a>
-          </span>
+          </p>
         </form>
       </div>
-    </div>
+    </>
   );
 }
