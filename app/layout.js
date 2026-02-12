@@ -1,6 +1,5 @@
 import { SearchProvider } from "@/lib/SearchContext";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar";
 
 export const metadata = {
   title: "News Dashboard",

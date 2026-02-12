@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { api } from "@/lib/api";
 import { useSearch } from "@/lib/SearchContext";
-import { ChevronRight, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function SearchResultsPage() {
@@ -48,10 +48,10 @@ export default function SearchResultsPage() {
         (item) =>
           item.title.toLowerCase().includes(query) ||
           (item.content && item.content.toLowerCase().includes(query)) ||
-          (item.category && item.category.toLowerCase().includes(query))
+          (item.category && item.category.toLowerCase().includes(query)),
       ),
       categories: allData.categories.filter((cat) =>
-        cat.name.toLowerCase().includes(query)
+        cat.name.toLowerCase().includes(query),
       ),
     };
   }, [searchQuery, allData]);
@@ -60,7 +60,7 @@ export default function SearchResultsPage() {
 
   const handleDeleteNews = async (id, title) => {
     const confirmed = window.confirm(
-      `Are you sure you want to delete "${title}"? This action cannot be undone.`
+      `Are you sure you want to delete "${title}"? This action cannot be undone.`,
     );
     if (!confirmed) return;
 
@@ -73,7 +73,9 @@ export default function SearchResultsPage() {
       });
       toast.success("✨ News deleted successfully!", { duration: 2000 });
     } catch (error) {
-      toast.error(`Failed to delete news: ${error.message}`, { duration: 3000 });
+      toast.error(`Failed to delete news: ${error.message}`, {
+        duration: 3000,
+      });
       console.error("Delete error:", error);
     } finally {
       setDeletingId(null);
@@ -82,7 +84,7 @@ export default function SearchResultsPage() {
 
   const handleDeleteCategory = async (id, name) => {
     const confirmed = window.confirm(
-      `Are you sure you want to delete "${name}"? This action cannot be undone.`
+      `Are you sure you want to delete "${name}"? This action cannot be undone.`,
     );
     if (!confirmed) return;
 
@@ -95,7 +97,9 @@ export default function SearchResultsPage() {
       });
       toast.success("✨ Category deleted successfully!", { duration: 2000 });
     } catch (error) {
-      toast.error(`Failed to delete category: ${error.message}`, { duration: 3000 });
+      toast.error(`Failed to delete category: ${error.message}`, {
+        duration: 3000,
+      });
       console.error("Delete error:", error);
     } finally {
       setDeletingId(null);
@@ -129,9 +133,13 @@ export default function SearchResultsPage() {
     <div>
       <Toaster position="top-right" />
       <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Search Results</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+          Search Results
+        </h1>
         <p className="text-gray-400 text-sm sm:text-base">
-          Found <span className="font-semibold text-cyan-400">{totalResults}</span> result
+          Found{" "}
+          <span className="font-semibold text-cyan-400">{totalResults}</span>{" "}
+          result
           {totalResults !== 1 ? "s" : ""} for{" "}
           <span className="font-semibold text-cyan-300">"{searchQuery}"</span>
         </p>
@@ -139,7 +147,9 @@ export default function SearchResultsPage() {
 
       {totalResults === 0 ? (
         <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6 sm:p-8 text-center">
-          <p className="text-gray-400 text-base sm:text-lg mb-2">No results found</p>
+          <p className="text-gray-400 text-base sm:text-lg mb-2">
+            No results found
+          </p>
           <p className="text-gray-500 text-sm">
             Try a different search term or check the spelling
           </p>
@@ -219,7 +229,7 @@ export default function SearchResultsPage() {
                     <button
                       disabled={deletingId === cat.id}
                       onClick={() => handleDeleteCategory(cat.id, cat.name)}
-                      className="p-2 rounded hover:bg-red-900/30 text-gray-400 hover:text-red-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                      className="p-2 rounded hover:bg-red-900/30 text-gray-400 hover:text-red-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       title="Delete category"
                     >
                       {deletingId === cat.id ? (
