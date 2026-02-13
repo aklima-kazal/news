@@ -5,6 +5,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import toast, { Toaster } from "react-hot-toast";
 import { api } from "@/lib/api";
+import { FiLogIn } from "react-icons/fi";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -63,7 +64,7 @@ export default function LoginPage() {
               value={formik.values.email}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="w-full px-3 py-2 rounded bg-slate-700"
+              className="w-full px-3 py-3 rounded bg-slate-700 outline-none"
             />
             {formik.touched.email && formik.errors.email && (
               <p className="text-red-400 text-sm mt-1">{formik.errors.email}</p>
@@ -79,7 +80,7 @@ export default function LoginPage() {
               value={formik.values.password}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="w-full px-3 py-2 rounded bg-slate-700"
+              className="w-full px-3 py-3 rounded bg-slate-700 outline-none"
             />
             {formik.touched.password && formik.errors.password && (
               <p className="text-red-400 text-sm mt-1">
@@ -91,14 +92,18 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={formik.isSubmitting}
-            className="w-full py-2 bg-blue-600 rounded hover:bg-blue-700 disabled:opacity-50"
+            className="w-full py-2 text-blue-900 font-bold text-lg cursor-pointer  bg-emerald-400 rounded-lg hover:rounded-xs transition-all ease-in duration-300 hover:bg-emerald-300 disabled:opacity-50"
           >
+            <FiLogIn className="inline-block mr-2 " size={25} />
             {formik.isSubmitting ? "Logging in..." : "Login"}
           </button>
 
-          <p className="text-center text-sm">
+          <p className="text-center text-base font-normal ">
             Don't have an account?{" "}
-            <a href="/register" className="text-blue-400 hover:underline">
+            <a
+              href="/register"
+              className="ml-1 font-normal text-base  text-blue-600 hover:underline"
+            >
               Register
             </a>
           </p>
