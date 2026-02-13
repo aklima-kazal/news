@@ -8,6 +8,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { Loader2 } from "lucide-react";
 import { GiEyelashes } from "react-icons/gi";
 import { FaEye } from "react-icons/fa";
+import { api } from "@/lib/api";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -30,13 +31,11 @@ export default function RegisterPage() {
 
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        // TODO → replace with backend call
-        await new Promise((res) => setTimeout(res, 1200));
-
-        toast.success("Account created!");
+        await api.register(values.email, values.password);
+        toast.success("Registration successful");
         router.push("/login");
-      } catch (error) {
-        toast.error("Registration failed");
+      } catch (err) {
+        toast.error(err.message);
       } finally {
         setSubmitting(false);
       }

@@ -34,13 +34,16 @@ export default function Dashboard() {
           api.getCategories().catch(() => []),
         ]);
 
-        setNewsData(newsRes || []);
+        setNewsData(Array.isArray(newsRes) ? newsRes : []);
         setStats({
-          totalNews: (newsRes || []).length,
-          publishedNews: (newsRes || []).filter((n) => n.status === "published")
-            .length,
-          draftNews: (newsRes || []).filter((n) => n.status === "draft").length,
-          categories: (categoriesRes || []).length,
+          totalNews: (Array.isArray(newsRes) ? newsRes : []).length,
+          publishedNews: (Array.isArray(newsRes) ? newsRes : []).filter(
+            (n) => n.status === "published",
+          ).length,
+          draftNews: (Array.isArray(newsRes) ? newsRes : []).filter(
+            (n) => n.status === "draft",
+          ).length,
+          categories: Array.isArray(categoriesRes) ? categoriesRes.length : 0,
         });
       } catch (err) {
         console.error("Dashboard fetch error:", err);
@@ -63,7 +66,7 @@ export default function Dashboard() {
     );
   }, [newsData, searchQuery]);
 
-  // Metrics
+  // Metrics calculation
   const metrics = useMemo(() => {
     const now = new Date();
     const days = timeRange === "today" ? 1 : timeRange === "week" ? 7 : 30;
@@ -104,6 +107,7 @@ export default function Dashboard() {
     };
   }, [filteredNews, timeRange]);
 
+  // Trending news
   const trendingNews = useMemo(() => {
     return [...(filteredNews || [])]
       .sort(
@@ -114,6 +118,7 @@ export default function Dashboard() {
       .slice(0, 3);
   }, [filteredNews]);
 
+  // Handle news click/view
   const handleNewsView = async (id) => {
     try {
       if (api.incrementNewsView) await api.incrementNewsView(id);
@@ -244,7 +249,11 @@ export default function Dashboard() {
                   </div>
                   <div className="flex items-center gap-3 ml-4">
                     <span
-                      className={`text-xs font-semibold px-3 py-1 rounded ${item.status === "published" ? "bg-green-900/30 text-green-400" : "bg-yellow-900/30 text-yellow-400"}`}
+                      className={`text-xs font-semibold px-3 py-1 rounded ${
+                        item.status === "published"
+                          ? "bg-green-900/30 text-green-400"
+                          : "bg-yellow-900/30 text-yellow-400"
+                      }`}
                     >
                       {item.status}
                     </span>

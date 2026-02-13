@@ -4,10 +4,15 @@ import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import toast, { Toaster } from "react-hot-toast";
-import { api } from "@/lib/api";
 import { FiLogIn } from "react-icons/fi";
+import { api } from "@/lib/api";
+import { useState } from "react";
+import { GiEyelashes } from "react-icons/gi";
+import { FaEye } from "react-icons/fa";
 
 export default function LoginPage() {
+  const [showPassword, setShowPassword] = useState(false);
+
   const router = useRouter();
 
   const formik = useFormik({
@@ -17,7 +22,9 @@ export default function LoginPage() {
     },
 
     validationSchema: Yup.object({
-      email: Yup.string().email("Invalid email").required("Email is required"),
+      email: Yup.string()
+        .email("Invalid email address")
+        .required("Email is required"),
       password: Yup.string()
         .min(6, "Minimum 6 characters")
         .required("Password is required"),
@@ -25,19 +32,15 @@ export default function LoginPage() {
 
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        const result = await api.login(values.email, values.password);
+        const res = await api.login(values.email, values.password);
 
-        if (result?.token) {
-          localStorage.setItem("token", result.token);
-          localStorage.setItem("auth", JSON.stringify(result.user));
+        localStorage.setItem("token", res.token);
+        localStorage.setItem("auth", JSON.stringify(res.user));
 
-          toast.success("Login successful!");
-          router.push("/dashboard");
-        } else {
-          toast.error(result?.message || "Login failed");
-        }
+        toast.success("Welcome!");
+        router.push("/dashboard");
       } catch (err) {
-        toast.error(err.message || "Login failed");
+        toast.error(err.message);
       } finally {
         setSubmitting(false);
       }
@@ -48,12 +51,15 @@ export default function LoginPage() {
     <>
       <Toaster position="top-right" />
 
-      <div className="flex items-center justify-center min-h-screen bg-slate-900 text-white">
+      <div className=" flex items-center justify-center min-h-screen bg-slate-900  text-white">
         <form
           onSubmit={formik.handleSubmit}
-          className="w-full max-w-md p-6 bg-slate-800 rounded-lg shadow-lg space-y-4"
+          className="w-full max-w-md p-6 bg-slate-800 rounded-xl shadow-xl/50 
+           space-y-4"
         >
-          <h1 className="text-2xl font-bold text-center">Login</h1>
+          <h1 className="text-2xl font-bold text-center text-violet-400 mb-6 ">
+            Login
+          </h1>
 
           {/* Email */}
           <div>
@@ -64,7 +70,7 @@ export default function LoginPage() {
               value={formik.values.email}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="w-full px-3 py-3 rounded bg-slate-700 outline-none"
+              className="w-full px-3 py-3 rounded bg-slate-700 outline-none focus:ring-2 focus:ring-emerald-400"
             />
             {formik.touched.email && formik.errors.email && (
               <p className="text-red-400 text-sm mt-1">{formik.errors.email}</p>
@@ -72,40 +78,49 @@ export default function LoginPage() {
           </div>
 
           {/* Password */}
-          <div>
+          <div className="relative">
             <input
               name="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Enter your password"
               value={formik.values.password}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="w-full px-3 py-3 rounded bg-slate-700 outline-none"
+              className="w-full px-3 py-3 rounded bg-slate-700 outline-none focus:ring-2 focus:ring-emerald-400"
             />
             {formik.touched.password && formik.errors.password && (
               <p className="text-red-400 text-sm mt-1">
                 {formik.errors.password}
               </p>
             )}
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-2 top-2 text-violet-400"
+            >
+              {showPassword ? <FaEye size={20} /> : <GiEyelashes size={20} />}
+            </button>
           </div>
 
+          {/* Submit */}
           <button
             type="submit"
             disabled={formik.isSubmitting}
-            className="w-full py-2 text-blue-900 font-bold text-lg cursor-pointer  bg-emerald-400 rounded-lg hover:rounded-xs transition-all ease-in duration-300 hover:bg-emerald-300 disabled:opacity-50"
+            className="w-full py-3 font-bold text-lg flex items-center justify-center gap-2 bg-emerald-400 text-slate-900 rounded-lg hover:bg-emerald-300 transition disabled:opacity-60 shadow-xl/30 cursor-pointer disabled:cursor-not-allowed"
           >
-            <FiLogIn className="inline-block mr-2 " size={25} />
+            <FiLogIn size={22} />
             {formik.isSubmitting ? "Logging in..." : "Login"}
           </button>
 
-          <p className="text-center text-base font-normal ">
+          {/* Register link */}
+          <p className="text-center text-sm text-slate-400">
             Don't have an account?{" "}
-            <a
-              href="/register"
-              className="ml-1 font-normal text-base  text-blue-600 hover:underline"
+            <span
+              onClick={() => router.push("/register")}
+              className="text-blue-400 cursor-pointer hover:underline"
             >
               Register
-            </a>
+            </span>
           </p>
         </form>
       </div>
